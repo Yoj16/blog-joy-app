@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-db
+  template:
+    metadata:
+      labels:
+        app: blog-db
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: rootpassword
+            - name: MYSQL_DATABASE
+              value: blog
+            - name: MYSQL_USER
+              value: blog
+            - name: MYSQL_PASSWORD
+              value: blog123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-db
+spec:
+  selector:
+    app: blog-db
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-app
+  template:
+    metadata:
+      labels:
+        app: blog-app
+    spec:
+      containers:
+        - name: blog-app
+          image: harbor.kakor.ovh/ipim2il/blog-joy-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: blog-db
+            - name: DB_NAME
+              value: blog
+            - name: DB_USER
+              value: blog
+            - name: DB_PASSWORD
+              value: blog123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-app
+spec:
+  selector:
+    app: blog-app
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+        - name: phpmyadmin
+          image: phpmyadmin/phpmyadmin:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: PMA_HOST
+              value: blog-db
+            - name: PMA_PORT
+              value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+spec:
+  selector:
+    app: phpmyadmin
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: blog-app
+spec:
+  to:
+    kind: Service
+    name: blog-app
+  port:
+    targetPort: 80
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: phpmyadmin
+spec:
+  to:
+    kind: Service
+    name: phpmyadmin
+  port:
+    targetPort: 80

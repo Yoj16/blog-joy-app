@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      context: ./.docker/php
+      dockerfile: Dockerfile 
+    container_name: blog_app
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - db
+    networks:
+      - blog_network
+    ports:
+      - "8080:80"
+
+  db:
+    image: mysql:8.0
+    container_name: blog_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: blog
+      MYSQL_USER: blog
+      MYSQL_PASSWORD: blog123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - blog_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    platform: linux/amd64
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: blog
+      PMA_PASSWORD: blog123
+    volumes:
+      - ./.docker/phpMyAdmin/custom.ini:/usr/local/etc/php/conf.d/zz_custom.ini
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - blog_network
+
+networks:
+  blog_network:
+
+volumes:
+  db_data:
