@@ -26,7 +26,9 @@ jobs:
       - name: Build and Push (AMD64 only)
         uses: docker/build-push-action@v6
         with:
-          context: .docker/php/Dockerfile
+          context: ./.docker/php
+          file: ./.docker/php/Dockerfile
           push: true
           tags: harbor.kakor.ovh/ipim2il/blog-joy-app:latest
           platforms: linux/amd64
+          
