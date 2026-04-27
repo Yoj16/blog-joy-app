@@ -13,6 +13,7 @@ spec:
         app: blog-db
     spec:
       securityContext:
+        runAsNonRoot: true
         fsGroup: 0
       containers:
         - name: mysql
