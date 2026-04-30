@@ -55,25 +55,43 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: blog-app
+  name: blog-joy-app
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-joy-app
   template:
+    metadata:
+      labels:
+        app: blog-joy-app
     spec:
       containers:
-        - name: blog-app
+        - name: blog-joy-app
+          image: harbor.kakor.ovh/ipim2il/blog-joy-app:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: PORT
-              value: "80"
+              value: "8080"
+            - name: DB_HOST
+              value: blog-db
+            - name: DB_NAME
+              value: blog
+            - name: DB_USER
+              value: blog
+            - name: DB_PASSWORD
+              value: blog123
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
+              protocol: TCP
           readinessProbe:
             httpGet:
               path: /
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 5
           livenessProbe:
             httpGet:
               path: /
@@ -85,24 +103,26 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: blog-app
+  name: blog-joy-app
 spec:
+  selector:
+    app: blog-joy-app
   ports:
     - name: http
       port: 80
-      targetPort: 80
-  selector:
-    app: blog-app
+      targetPort: 8080
+      protocol: TCP
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: blog-app
+  name: blog-joy-app
 spec:
   to:
     kind: Service
-    name: blog-app
+    name: blog-joy-app
   port:
     targetPort: 80
   tls:
     termination: edge
+
