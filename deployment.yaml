@@ -39,6 +39,15 @@ spec:
             tcpSocket:
               port: 3306
             initialDelaySeconds: 30
+          volumeMounts:
+            - name: nfs-storage
+              mountPath: /var/lib/mysql # Dossier interne à MySQL
+              subPath: mysql-data
+      volumes:
+        - name: nfs-storage
+          nfs:
+            server: 192.168.1.56
+            path: /Volume1/public/nfs-share-openshift/groupe-1
 ---
 apiVersion: v1
 kind: Service
