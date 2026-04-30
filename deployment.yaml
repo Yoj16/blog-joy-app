@@ -78,7 +78,7 @@ spec:
       containers:
         - name: blog-joy-app
           image: harbor.kakor.ovh/ipim2il/blog-joy-app:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: PORT
               value: "8080"
@@ -131,7 +131,7 @@ spec:
     kind: Service
     name: blog-joy-app
   port:
-    targetPort: 80
+    targetPort: http
   tls:
     termination: edge
 
