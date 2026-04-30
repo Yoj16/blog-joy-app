@@ -4,8 +4,7 @@ require_once 'src/env.php';
 require_once 'src/controllers/FrontController.php';
 
 (new Env(__DIR__ . '/.env'))->load();
-$frontController = new FrontController();
-
+  $frontController = new FrontController();
 
 try {
   if (isset($_GET['page'])) {

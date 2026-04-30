@@ -10,6 +10,9 @@ WORKDIR /var/www/html
 # Comme ton index.php est à la racine, il sera dans /var/www/html/index.php
 COPY . /var/www/html
 
+RUN touch /var/www/html/.env && \
+    chgrp -R 0 /var/www/html && \
+    chmod -R g+rwX /var/www/html
 # 4. Ajustement des permissions pour la sécurité OpenShift (Arbitrary User IDs)
 # OpenShift utilise un utilisateur aléatoire appartenant au groupe root (0)
 RUN chgrp -R 0 /var/www/html && \
