@@ -57,62 +57,42 @@ kind: Deployment
 metadata:
   name: blog-app
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: blog-app
   template:
-    metadata:
-      labels:
-        app: blog-app
     spec:
-      securityContext:
-        runAsNonRoot: true
-        fsGroup: 1001
       containers:
         - name: blog-app
-          image: harbor.kakor.ovh/ipim2il/blog-joy-app:latest
-          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "80"
           ports:
             - name: http
-              containerPort: 80   # ✅ IMPORTANT FIX
-          securityContext:
-            runAsUser: 1001
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          env:
-            - name: DB_HOST
-              value: blog-db
-            - name: DB_NAME
-              value: blog
-            - name: DB_USER
-              value: blog
-            - name: DB_PASSWORD
-              value: blog123
+              containerPort: 80
           readinessProbe:
-            tcpSocket:
-              port: 80   # ✅ évite crash HTTP probe
+            httpGet:
+              path: /
+              port: http
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 5
           livenessProbe:
-            tcpSocket:
-              port: 80
+            httpGet:
+              path: /
+              port: http
             initialDelaySeconds: 30
             periodSeconds: 30
+            timeoutSeconds: 5
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: blog-app
 spec:
-  selector:
-    app: blog-app
   ports:
     - name: http
       port: 80
-      targetPort: http
+      targetPort: 80
+  selector:
+    app: blog-app
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -123,6 +103,6 @@ spec:
     kind: Service
     name: blog-app
   port:
-    targetPort: http
+    targetPort: 80
   tls:
     termination: edge
